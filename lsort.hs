@@ -6,8 +6,6 @@ TODO:
 – transliteration
 -}
 
-module Main where
-
 
 import Data.List (nub,sortBy)
 import Data.Text (pack,replace,Text(),unpack)								-- text 1.2.2.2-1+b1
