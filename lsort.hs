@@ -1,16 +1,25 @@
 {-# OPTIONS_GHC -Wno-tabs #-}
 
 {-
-TODO:
-– case folding
-– transliteration
+lsort does linguistically aware sorting.
+The basic sorting is done using UCA, i.e. noticing diacritics only when there's no other option. Modified letters like ŋ or ʒ are sorted according to their base letter. Cyrillic and Greek are sorted inside Latin. Spaces are ignored. There’s also a set of custom substitutions which can be used i.a. to fix the sorting of characters from the Private Use Area.
+
+TODO
+– case folding: do I really want it though?
+
+CHANGELOG
+0.1.0	2018.02.05
+		first version
 -}
 
 
 import Data.List (nub,sortBy)
-import Data.Text (pack,replace,Text(),unpack)								-- text 1.2.2.2-1+b1
-import Data.Text.ICU (collate,NormalizationMode(NFC,NFKD),normalize,uca)	-- text-icu 0.7.0.1-6+b2
-import Data.Text.ICU.Translit (trans,transliterate)							-- text-icu-translit
+-- text 1.2.2.2-1+b1
+import Data.Text (pack,replace,Text(),unpack)
+-- text-icu 0.7.0.1-6+b2
+import Data.Text.ICU (collate,NormalizationMode(NFC,NFKD),normalize,uca)
+-- text-icu-translit 0.1.07
+import Data.Text.ICU.Translit (trans,transliterate)
 
 
 -- - subs -------------------------------------------------------------------------------------- <<< -
@@ -52,6 +61,11 @@ import Data.Text.ICU.Translit (trans,transliterate)							-- text-icu-translit
 --	865	double inverted breve (n͡g)
 subs :: [(String,String)]
 subs = [
+	(" ",""),
+	-- Cyrillic
+	("ҡ","к"),
+	("ү","у\769"),
+	("ҙ","з"),
 	-- Minion Pro MOD2
 	("\61440","e\768\769"),
 	("\61441","V\769"),
@@ -245,7 +259,7 @@ subs = [
 
 -- = main ====================================================================================== <<< =
 
-main :: IO ()
+main :: IO [()]
 main = do
 	-- read the data from stdin
 	datums <- getContents
@@ -259,8 +273,8 @@ main = do
 		-- apply the substitutions to the copy
 		tmpSubd = map (doSubs subPckd) tmpNrmd
 		-- transliterate the copy (see the comment above subs regarding the order)
-		tmpTli1 = map (transliterate $ trans "Cyrillic-Latin") tmpSubd
-		tmpTli2 = map (transliterate $ trans "Greek-Latin") tmpTli1
+		tmpTli1 = map (transliterate $ trans (pack "Cyrillic-Latin")) tmpSubd
+		tmpTli2 = map (transliterate $ trans (pack "Greek-Latin")) tmpTli1
 		-- zip the modified and the originals, and sort by the former
 		tmpSrtd = sortBy collateFst $ zip tmpTli2 datPckd
 		-- return the now-sorted originals and compose them for good measure
