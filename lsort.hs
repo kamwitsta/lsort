@@ -5,7 +5,7 @@ lsort does linguistically aware sorting.
 The basic sorting is done using UCA, i.e. noticing diacritics only when there's no other option. Modified letters like ŋ or ʒ are sorted according to their base letter. Cyrillic and Greek are sorted inside Latin. Spaces are ignored. There’s also a set of custom substitutions which can be used i.a. to fix the sorting of characters from the Private Use Area.
 
 TODO
-– case folding: do I really want it though?
+– case folding: do I really want that though?
 
 CHANGELOG
 0.1.0	2018.02.05
@@ -13,7 +13,7 @@ CHANGELOG
 -}
 
 
-import Data.List (nub,sortBy)
+import Data.List (sortBy)
 -- text 1.2.2.2-1+b1
 import Data.Text (pack,replace,Text(),unpack)
 -- text-icu 0.7.0.1-6+b2
@@ -265,7 +265,7 @@ main = do
 	datums <- getContents
 	let
 		-- split the data into lines, remove duplicates, and pack them into Text
-		datPckd = map pack (nub $ lines datums)
+		datPckd = map pack $ lines datums
 		-- pack the substitutions into Text
 		subPckd = map pack2 subs
 		-- make a copy of the data for sorting and normalize it
